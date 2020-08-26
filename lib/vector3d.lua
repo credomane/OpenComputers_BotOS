@@ -5,7 +5,7 @@ local module = {
     _license = [[MIT]]
 }
 
--- local function for checking args are what we want
+-- local function for checking args are what we want. Shamelessly taken from Open Computers
 local function checkArg(n, have, ...)
     have = type(have)
     local function check(want, ...)

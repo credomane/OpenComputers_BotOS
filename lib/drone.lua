@@ -1,3 +1,4 @@
 local name = drone.name()
-loadfile("/bots/drone/" .. name .. ".lua")()
+
+return loadfile("/devices/drone/" .. name .. ".lua")
 

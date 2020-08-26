@@ -2,6 +2,9 @@
 
 local isDrone = component.list("drone", true)()
 
+local vector = require("vector3d")
+local gps = require("gps")
+
 if not isDrone then
     return false
 end
@@ -16,8 +19,8 @@ local statusText = {
     wrap = true
 }
 
-drone.pos = checkPos({ 0, 0, 0 })
-drone.zero = checkPos({ 0, 0, 0 })
+drone.pos = vector(0, 0, 0)
+drone.home = vector(0, 0, 0)
 
 function drone.status(l1, l2)
     checkArg(1, l1, "string", "number", "nil")
@@ -53,67 +56,74 @@ end
 drone.status("Setting up Drone")
 
 function drone.getPosition()
-    return checkPos(drone.pos)
+    return vector(drone.pos)
 end
 
 function drone.setPosition(pos)
-    checkArg(1, pos, "table")
-    drone.pos = checkPos(pos)
+    if not vector.isVector(pos) then
+        error("pos is not a vector", 3)
+    end
+    drone.pos = vector(pos)
 end
 
 function drone.changePosition(pos)
-    checkArg(1, pos, "table")
-    pos = checkPos(pos)
-    drone.pos.x = drone.pos.x + pos.x
-    drone.pos.y = drone.pos.y + pos.y
-    drone.pos.z = drone.pos.z + pos.z
+    if not vector.isVector(pos) then
+        error("pos is not a vector", 3)
+    end
+    drone.pos = drone.pos + pos
 end
 
 function drone.gps()
     local x, y, z = gps.locate(2);
-    local pos = checkPos({ x, y, z })
+    local pos = vector(x, y, z)
     drone.setPosition(pos)
     return pos
 end
 
 function drone.distanceFrom(pos)
-    checkArg(1, pos, "table")
-    pos = checkPos(pos)
+    if not vector.isVector(pos) then
+        error("pos is not a vector", 3)
+    end
     return math.floor(math.sqrt((pos.x - drone.pos.x) ^ 2 + (pos.y - drone.pos.y) ^ 2 + (pos.z - drone.pos.z) ^ 2) * 100) / 100
 end
 
-function drone.setZeroAt(pos)
-    checkArg(1, pos, "table")
-    pos = checkPos(pos)
-    drone.zero.x = pos.x
-    drone.zero.y = pos.y
-    drone.zero.z = pos.z
+function drone.setHomeAt(pos)
+    if not vector.isVector(pos) then
+        error("pos is not a vector", 3)
+    end
+    drone.home = vector(pos)
 end
 
+--Moves drone by passed vector
+function drone.move(pos)
+    if not vector.isVector(pos) then
+        error("pos is not a vector", 3)
+    end
+    drone.changePosition(pos)
+    omove(pos:unpack())
+end
+
+--Moves drone by passed vector using drone.home as offset
 function drone.moveTo(pos)
-    checkArg(1, pos, "table")
-    pos = checkPos(pos)
-    local newX = drone.zero.z + pos.x
-    local newY = drone.zero.y + pos.y
-    local newZ = drone.zero.z + pos.z
-    drone.move(newX - drone.pos.x, newY - drone.pos.y, newZ - drone.pos.z)
+    if not vector.isVector(pos) then
+        error("pos is not a vector", 3)
+    end
+    local dest = drone.home + pos
+    local moveOffset = dest - drone.pos
+    drone.changePosition(moveOffset)
+    omove(moveOffset:unpack())
 end
 
+--Moves drone by passed vector using drone.home as offset
+-- and attempts to wait for drone to get there before returning
 function drone.moveToSync(pos)
-    checkArg(1, pos, "table")
-    pos = checkPos(pos)
+    if not vector.isVector(pos) then
+        error("pos is not a vector", 3)
+    end
 
-    local dest = checkPos({
-        drone.zero.x + pos.x,
-        drone.zero.y + pos.y,
-        drone.zero.z + pos.z
-    })
+    drone.moveTo(pos)
 
-    local newX = drone.zero.x + pos.x
-    local newY = drone.zero.y + pos.y
-    local newZ = drone.zero.z + pos.z
-    omove(newX - drone.pos.x, newY - drone.pos.y, newZ - drone.pos.z)
-
+    local dest = drone.home + pos
     local distance = drone.distanceFrom(dest)
     local lastDistance = distance
 
@@ -147,16 +157,10 @@ function drone.moveToSync(pos)
     return true
 end
 
-function drone.move(pos)
-    checkArg(1, pos, "table")
-    pos = checkPos(pos)
-    omove(pos.x, pos.y, pos.z)
-end
-
 if gps then
     drone.status("GPS locate");
     local pos = drone.gps()
-    drone.status(pos.x .. "," .. pos.y .. "," .. pos.z)
+    drone.status("" .. pos)
 end
 
 return true

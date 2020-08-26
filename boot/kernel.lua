@@ -106,7 +106,7 @@ function _G.loadmodule(module)
                     crash("Module load failed: '" .. module .. "' Didn't return proper value.")
                 end
             end
-            loaded[module] = true
+            loaded[module] = ok
             return loaded[module]
         else
             crash("Module not found: " .. module)
@@ -123,7 +123,7 @@ log(computer.freeMemory() .. "/" .. computer.totalMemory() .. " RAM")
 log(computer.energy() .. "/" .. computer.maxEnergy() .. " Energy")
 
 --[[ Load all the modules ]]--
-loadmodule("computer")
+--loadmodule("computer")
 loadmodule("os")
 
 --[[ What device type are we?]]--
@@ -133,8 +133,14 @@ _G.isMicro = loadmodule("microcontroller")
 _G.isTablet = loadmodule("tablet")
 _G.isDesktop = not (isDrone or isRobot or isMicro or isTablet)
 
+local osfile
+
+if isDrone then
+    osfile = require("drone")
+end
+
 while true do
-    local ok, err = dofile("/boot/os.lua")
+    local ok, err = osfile()
     if not ok then
         crash(err)
     end
