@@ -6,6 +6,6 @@ if not isTablet then
     return false
 end
 
-_G.drone = component.proxy(isTablet)
+_G.tablet = component.proxy(isTablet)
 
 return true

@@ -6,6 +6,6 @@ if not isMicro then
     return false
 end
 
-_G.drone = component.proxy(isMicro)
+_G.microcontroller = component.proxy(isMicro)
 
 return true

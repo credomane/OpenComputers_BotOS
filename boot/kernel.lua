@@ -15,12 +15,12 @@ local libPaths = {
 
 --[[ Crash the system in a slightly prettier fashion. Not necessary, but nice to have. ]]--
 function _G.crash(reason)
-    checkArg(1, reason, "string", "nil") -- This is an example of checkArg's ability to check multiple types
+    checkArg(1, reason, "string", "nil")
     reason = reason or "No reason given"
-    log("==== crash " .. os.date() .. " ====") -- Log the crash header, ex. "==== crash 24/04/20 18:52:34 ===="
-    log("crash reason: " .. reason) -- Log the crash reason.
+    log("==== crash " .. os.date() .. " ====")
+    log("crash reason: " .. reason)
     local traceback = debug.traceback()
-    traceback = traceback:gsub("\t", "  ") -- Replace the tab character (not printable) with spaces (printable)
+    traceback = traceback:gsub("\t", "  ")
     for line in traceback:gmatch("[^\n]+") do
         log(line)
     end
@@ -119,7 +119,7 @@ loadmodule("_G")
 loadmodule("dump_components")
 
 log("Starting " .. _OSVERSION)
-log((computer.totalMemory() - computer.freeMemory()) .. "/" .. computer.totalMemory() .. " RAM")
+log(computer.freeMemory() .. "/" .. computer.totalMemory() .. " RAM")
 log(computer.energy() .. "/" .. computer.maxEnergy() .. " Energy")
 
 --[[ Load all the modules ]]--
@@ -127,37 +127,11 @@ loadmodule("computer")
 loadmodule("os")
 
 --[[ What device type are we?]]--
-_G.isDesktop = true --If one of the checks for Drone, Robot, Microcontroller, Tablet succeeds this gets changed to false.
-
-if loadmodule("drone") then
-    _G.isDrone = true
-    _G.isDesktop = false
-else
-    _G.isDrone = false
-end
-
-if loadmodule("robot") then
-    _G.isRobot = true
-    _G.isDesktop = false
-else
-    _G.isRobot = false
-end
-
-if loadmodule("microcontroller") then
-    _G.isMicro = true
-    _G.isDesktop = false
-else
-    _G.isMicro = false
-end
-
-if loadmodule("tablet") then
-    _G.isTablet = true
-    _G.isDesktop = false
-else
-    _G.isTablet = false
-end
-
-loadmodule("os")
+_G.isDrone = loadmodule("drone")
+_G.isRobot = loadmodule("robot")
+_G.isMicro = loadmodule("microcontroller")
+_G.isTablet = loadmodule("tablet")
+_G.isDesktop = not (isDrone or isRobot or isMicro or isTablet)
 
 while true do
     local ok, err = dofile("/boot/os.lua")

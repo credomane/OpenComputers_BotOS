@@ -6,6 +6,6 @@ if not isRobot then
     return false
 end
 
-_G.drone = component.proxy(isRobot)
+_G.robot = component.proxy(isRobot)
 
 return true
