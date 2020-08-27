@@ -48,6 +48,15 @@ local function isVector(t)
     return getmetatable(t) == vector
 end
 
+-- get the distance between two vectors
+local function dist(a, b)
+    log("a=" .. tostring(a))
+    log("b=" .. tostring(b))
+    assert(isVector(a), "wrong argument type: (expected <vector>, got " .. type(a) .. ")")
+    assert(isVector(b), "wrong argument type: (expected <vector>, got " .. type(b) .. ")")
+    return math.sqrt((a.x - b.x) ^ 2 + (a.y - b.y) ^ 2 + (a.z - b.z) ^ 2)
+end
+
 -- set the values of the vector to something new
 function vector:set(x, y, z)
     if isVector(x) then
@@ -63,7 +72,7 @@ end
 
 -- replace the values of a vector with the values of another vector
 function vector:replace(v)
-    assert(isVector(v), "wrong argument type: (expected <vector>, got "..type(v)..")")
+    assert(isVector(v), "wrong argument type: (expected <vector>, got " .. type(v) .. ")")
     self.x, self.y, self.z = v.x, v.y, v.z
     return self
 end
@@ -76,15 +85,15 @@ end
 -- meta function to add vectors together
 -- ex: (vector(5,6,7) + vector(7,6,5)) is the same as vector(12,11,12)
 function vector.__add(a, b)
-    assert(isVector(a), "wrong argument type: (expected <vector>, got "..type(a)..")")
-    assert(isVector(b), "wrong argument type: (expected <vector>, got "..type(b)..")")
+    assert(isVector(a), "wrong argument type: (expected <vector>, got " .. type(a) .. ")")
+    assert(isVector(b), "wrong argument type: (expected <vector>, got " .. type(b) .. ")")
     return new(a.x + b.x, a.y + b.y, a.z + b.z)
 end
 
 -- meta function to subtract vectors
 function vector.__sub(a, b)
-    assert(isVector(a), "wrong argument type: (expected <vector>, got "..type(a)..")")
-    assert(isVector(b), "wrong argument type: (expected <vector>, got "..type(b)..")")
+    assert(isVector(a), "wrong argument type: (expected <vector>, got " .. type(a) .. ")")
+    assert(isVector(b), "wrong argument type: (expected <vector>, got " .. type(b) .. ")")
     return new(a.x - b.x, a.y - b.y, a.z - b.z)
 end
 
@@ -95,15 +104,15 @@ function vector.__mul(a, b)
     elseif type(b) == 'number' then
         return new(a.x * b, a.y * b, a.z * b)
     else
-        assert(isVector(a), "wrong argument type: (expected <vector>, got "..type(a)..")")
-        assert(isVector(b), "wrong argument type: (expected <vector>, got "..type(b)..")")
+        assert(isVector(a), "wrong argument type: (expected <vector>, got " .. type(a) .. ")")
+        assert(isVector(b), "wrong argument type: (expected <vector>, got " .. type(b) .. ")")
         return new(a.x * b.x, a.y * b.y, a.z * b.z)
     end
 end
 
 -- meta function to divide vectors
 function vector.__div(a, b)
-    assert(isVector(a), "wrong argument type: (expected <vector>, got "..type(a)..")")
+    assert(isVector(a), "wrong argument type: (expected <vector>, got " .. type(a) .. ")")
     checkArg(2, b, "number")
     return new(a.x / b.x, a.y / b.y, a.z / b.z)
 end
@@ -111,14 +120,14 @@ end
 -- meta function to make vectors negative
 -- ex: (negative) -vector(5,6,7) is the same as vector(-5,-6,-7)
 function vector.__unm(v)
-    assert(isVector(v), "wrong argument type: (expected <vector>, got "..type(v)..")")
+    assert(isVector(v), "wrong argument type: (expected <vector>, got " .. type(v) .. ")")
     return new(-v.x, -v.y, -v.z)
 end
 
 -- meta function to check if vectors have the same values
 function vector.__eq(a, b)
-    assert(isVector(a), "wrong argument type: (expected <vector>, got "..type(a)..")")
-    assert(isVector(b), "wrong argument type: (expected <vector>, got "..type(b)..")")
+    assert(isVector(a), "wrong argument type: (expected <vector>, got " .. type(a) .. ")")
+    assert(isVector(b), "wrong argument type: (expected <vector>, got " .. type(b) .. ")")
     return a.x == b.x and a.y == b.y and a.z == b.z
 end
 
@@ -126,13 +135,6 @@ end
 -- ex: print(vector(2,8,3)) - this prints '(2, 8, 3)'
 function vector:__tostring()
     return "(" .. self.x .. ", " .. self.y .. ", " .. self.z .. ")"
-end
-
--- get the distance between two vectors
-function vector.dist(a, b)
-    assert(isVector(a), "wrong argument type: (expected <vector>, got "..type(a)..")")
-    assert(isVector(b), "wrong argument type: (expected <vector>, got "..type(b)..")")
-    return math.sqrt((a.x - b.x) ^ 2 + (a.y - b.y) ^ 2 + (a.z - b.z) ^ 2)
 end
 
 -- return the dot product of the vector
@@ -168,7 +170,7 @@ end
 
 -- return x and y of vector as a regular array
 function vector:array()
-    return {self.x, self.y, self.z}
+    return { self.x, self.y, self.z }
 end
 
 -- return x and y of vector, unpacked from table
@@ -180,6 +182,7 @@ end
 -- pack up and return module
 module.new = new
 module.isVector = isVector
+module.dist = dist
 
 return setmetatable(module, { __call = function(_, ...)
     return new(...)
