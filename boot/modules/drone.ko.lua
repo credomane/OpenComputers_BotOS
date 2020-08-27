@@ -2,21 +2,22 @@
 
 local isDrone = component.list("drone", true)()
 
-local vector = require("vector3d")
-local gps = require("gps")
-
 if not isDrone then
     return false
 end
 
 _G.drone = component.proxy(isDrone)
 
+local vector = require("vector3d")
+local gps = require("gps")
+
 local omove = drone.move -- Going to override the original drone.move but we still need original to actually move
 
 local statusText = {
     l1 = "",
     l2 = "",
-    wrap = true
+    wrap = true,
+    debuglog = false
 }
 
 drone.pos = vector(0, 0, 0)
@@ -51,6 +52,9 @@ function drone.status(l1, l2)
     end
 
     drone.setStatusText(statusText.l1 .. "\n" .. statusText.l2);
+    if statusText.debuglog then
+        log(statusText.l1 .. " " .. statusText.l2)
+    end
 end
 
 drone.status("Setting up Drone")
@@ -63,18 +67,27 @@ function drone.setPosition(pos)
     if not vector.isVector(pos) then
         error("pos is not a vector", 3)
     end
-    drone.pos = vector(pos)
+    drone.pos:set(pos)
 end
 
 function drone.changePosition(pos)
     if not vector.isVector(pos) then
         error("pos is not a vector", 3)
     end
-    drone.pos = drone.pos + pos
+    drone.pos:set(drone.pos + pos)
 end
 
 function drone.gps()
-    local x, y, z = gps.locate(2);
+    local x, y, z
+    local tries = 10
+    repeat
+        x, y, z = gps.locate(5)
+        tries = tries - 1
+        if tries < 0 then
+            drone.status("GPS failed", "10 tries")
+            break
+        end
+    until x ~= nil
     local pos = vector(x, y, z)
     drone.setPosition(pos)
     return pos
@@ -91,7 +104,7 @@ function drone.setHomeAt(pos)
     if not vector.isVector(pos) then
         error("pos is not a vector", 3)
     end
-    drone.home = vector(pos)
+    drone.home:set(pos)
 end
 
 --Moves drone by passed vector
@@ -160,7 +173,7 @@ end
 if gps then
     drone.status("GPS locate");
     local pos = drone.gps()
-    drone.status("" .. pos)
+    drone.status(tostring(pos))
 end
 
 return true

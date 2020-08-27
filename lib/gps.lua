@@ -2,6 +2,8 @@ local floor, sqrt, abs = math.floor, math.sqrt, math.abs
 
 local CHANNEL_GPS, gps = 65534, {}
 
+local modem = component.proxy(component.list("modem", true)())
+
 local function round(v, m)
     m = m or 1.0
     return {

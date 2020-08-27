@@ -116,7 +116,7 @@ end
 
 --[[ Setup the stuff we want on the global variable. ]]--
 loadmodule("_G")
-loadmodule("dump_components")
+--loadmodule("dump_components")
 
 log("Starting " .. _OSVERSION)
 log(computer.freeMemory() .. "/" .. computer.totalMemory() .. " RAM")

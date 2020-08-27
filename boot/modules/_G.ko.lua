@@ -26,12 +26,14 @@ function _G.log(msg)
         else
             y = y + 1
         end
-        if fs and not fs.isReadOnly() then
-            local f = fs.open("/logs/boot.log", "a")
-            fs.write(f, "[ " .. os.date() .. " ] " .. tostring(msg) .. "\n");
-            fs.close(f)
-        end
     end
+
+    if fs and not fs.isReadOnly() then
+        local f = fs.open("/logs/boot.log", "a")
+        fs.write(f, "[ " .. os.date() .. " ] " .. tostring(msg) .. "\n");
+        fs.close(f)
+    end
+
     -- boot can be slow in some environments, protect from timeouts
     if computer.uptime() - last_sleep > 1 then
         local signal = table.pack(computer.pullSignal(0))
