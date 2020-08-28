@@ -23,6 +23,11 @@ local statusText = {
 drone.pos = vector(0, 0, 0)
 drone.home = vector(0, 0, 0)
 
+function drone.debug(debug)
+    checkArg(1, debug, "boolean")
+    statusText.debuglog = debug
+end
+
 function drone.status(l1, l2)
     checkArg(1, l1, "string", "number", "nil")
     checkArg(2, l2, "string", "number", "nil")
@@ -97,7 +102,11 @@ function drone.distanceFrom(pos)
     if not vector.isVector(pos) then
         error("pos is not a vector", 3)
     end
-    return math.floor(math.sqrt((pos.x - drone.pos.x) ^ 2 + (pos.y - drone.pos.y) ^ 2 + (pos.z - drone.pos.z) ^ 2) * 100) / 100
+    return math.floor(vector.dist(drone.pos, pos) * 100) / 100
+end
+
+function drone.getHome()
+    return drone.home:clone()
 end
 
 function drone.setHomeAt(pos)
@@ -129,22 +138,25 @@ end
 
 --Moves drone by passed vector using drone.home as offset
 -- and attempts to wait for drone to get there before returning
-function drone.moveToSync(pos)
+function drone.moveToSync(pos, distanceFuzzing)
     if not vector.isVector(pos) then
         error("pos is not a vector", 3)
     end
 
+    local curPos = drone.getPosition()
     drone.moveTo(pos)
+    drone.setPosition(curPos) --Gotta reset position since moveTo() sets it to the destination
 
     local dest = drone.home + pos
     local distance = drone.distanceFrom(dest)
     local lastDistance = distance
+    distanceFuzzing = distanceFuzzing or 0.5
 
-    while distance > 0.1 do
+    while distance > distanceFuzzing do
         os.sleep(1)
         drone.gps()
         distance = drone.distanceFrom(dest)
-        if math.floor(distance) == math.floor(lastDistance) and distance > 0.1 then
+        if math.floor(distance) == math.floor(lastDistance) and distance > distanceFuzzing then
             --Drone is stuck! Make some noise and flash the lights then shutdown
             omove(0, 0, 0)
             drone.gps()
