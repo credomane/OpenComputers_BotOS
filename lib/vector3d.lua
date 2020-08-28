@@ -50,8 +50,6 @@ end
 
 -- get the distance between two vectors
 local function dist(a, b)
-    log("a=" .. tostring(a))
-    log("b=" .. tostring(b))
     assert(isVector(a), "wrong argument type: (expected <vector>, got " .. type(a) .. ")")
     assert(isVector(b), "wrong argument type: (expected <vector>, got " .. type(b) .. ")")
     return math.sqrt((a.x - b.x) ^ 2 + (a.y - b.y) ^ 2 + (a.z - b.z) ^ 2)
