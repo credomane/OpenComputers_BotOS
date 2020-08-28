@@ -150,13 +150,21 @@ function drone.moveToSync(pos, distanceFuzzing)
     local dest = drone.home + pos
     local distance = drone.distanceFrom(dest)
     local lastDistance = distance
-    distanceFuzzing = distanceFuzzing or 0.5
+    distanceFuzzing = distanceFuzzing or 0.1
 
-    while distance > distanceFuzzing do
-        os.sleep(1)
+    local stillMoving = true
+    local stuckCount = 0
+    while stillMoving do
+        os.sleep(0.5)
         drone.gps()
         distance = drone.distanceFrom(dest)
+        if math.floor(distance) == math.floor(lastDistance) and distance <= distanceFuzzing then
+            stillMoving = false
+        end
         if math.floor(distance) == math.floor(lastDistance) and distance > distanceFuzzing then
+            stuckCount = stuckCount + 1
+        end
+        if math.floor(distance) == math.floor(lastDistance) and distance > distanceFuzzing and stuckCount > 4 then
             --Drone is stuck! Make some noise and flash the lights then shutdown
             omove(0, 0, 0)
             drone.gps()
